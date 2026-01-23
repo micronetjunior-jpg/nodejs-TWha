@@ -6,8 +6,9 @@
   "author": "alphasec",
   "license": "MIT",
   "dependencies": {
-    "express": "^4.19.2",
-    "mediasoup"
+     "express": "^4.19.2",
+    "socket.io": "^4.7.5",
+    "mediasoup": "^3.12.16"
   },
   "scripts": {
     "start": "node index.js"
