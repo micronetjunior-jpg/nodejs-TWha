@@ -1,6 +1,4 @@
-// server.js
 import http from 'http';
-import { Server } from 'socket.io';
 import mediasoup from 'mediasoup';
 
 const PORT = 3000;
@@ -22,9 +20,7 @@ const mediasoupConfig = {
     ]
   },
   webRtcTransport: {
-    listenIps: [
-      { ip: '0.0.0.0', announcedIp: null } // luego pondremos IP pública
-    ],
+    listenIps: [{ ip: '0.0.0.0', announcedIp: null }],
     enableUdp: true,
     enableTcp: true,
     preferUdp: true
@@ -34,51 +30,50 @@ const mediasoupConfig = {
 let worker;
 let router;
 
-// ---- HTTP + WS ----
-const httpServer = http.createServer();
-const io = new Server(httpServer, {
-  cors: { origin: '*' }
+// ---- Utils ----
+function json(res, data) {
+  res.writeHead(200, { 'Content-Type': 'application/json' });
+  res.end(JSON.stringify(data));
+}
+
+// ---- Server ----
+const server = http.createServer(async (req, res) => {
+  if (req.method === 'GET' && req.url === '/health') {
+    return json(res, { status: 'ok', mediasoup: true });
+  }
+
+  if (req.method === 'GET' && req.url === '/rtp-capabilities') {
+    return json(res, router.rtpCapabilities);
+  }
+
+  if (req.method === 'POST' && req.url === '/create-transport') {
+    const transport = await router.createWebRtcTransport(
+      mediasoupConfig.webRtcTransport
+    );
+
+    return json(res, {
+      id: transport.id,
+      iceParameters: transport.iceParameters,
+      iceCandidates: transport.iceCandidates,
+      dtlsParameters: transport.dtlsParameters
+    });
+  }
+
+  res.writeHead(404);
+  res.end();
 });
 
+// ---- Bootstrap ----
 async function start() {
   worker = await mediasoup.createWorker(mediasoupConfig.worker);
-
-  worker.on('died', () => {
-    console.error('❌ MediaSoup worker died');
-    process.exit(1);
-  });
-
   router = await worker.createRouter({
     mediaCodecs: mediasoupConfig.router.mediaCodecs
   });
 
-  console.log('✅ MediaSoup ready');
+  console.log('✅ MediaSoup listo');
 
-  io.on('connection', socket => {
-    console.log('🔌 Client connected:', socket.id);
-
-    // 1️⃣ Enviar capacidades RTP
-    socket.on('getRtpCapabilities', (_, cb) => {
-      cb(router.rtpCapabilities);
-    });
-
-    // 2️⃣ Crear WebRTC Transport
-    socket.on('createTransport', async (_, cb) => {
-      const transport = await router.createWebRtcTransport(
-        mediasoupConfig.webRtcTransport
-      );
-
-      cb({
-        id: transport.id,
-        iceParameters: transport.iceParameters,
-        iceCandidates: transport.iceCandidates,
-        dtlsParameters: transport.dtlsParameters
-      });
-    });
-  });
-
-  httpServer.listen(PORT, HOST, () => {
-    console.log(`🚀 Server listening on ${HOST}:${PORT}`);
+  server.listen(PORT, HOST, () => {
+    console.log(`🚀 HTTP server on http://${HOST}:${PORT}`);
   });
 }
 
