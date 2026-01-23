@@ -1,10 +1,26 @@
+const mediasoup = require('mediasoup');
 const express = require('express');
-const path = require('path');
-const router = express.Router();
+const http = require('http');
+const { Server } = require('socket.io');
+const config = require('./config');
 
-// Serve the index.html file for the root route
-router.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '../views/index.html'));
-});
+(async () => {
+  const app = express();
+  const server = http.createServer(app);
+  const io = new Server(server);
 
-module.exports = router;
+  const worker = await mediasoup.createWorker(config.mediasoup.worker);
+  const router = await worker.createRouter(config.mediasoup.router);
+
+  io.on('connection', socket => {
+    console.log('Cliente conectado');
+
+    socket.on('getRtpCapabilities', (_, cb) => {
+      cb(router.rtpCapabilities);
+    });
+  });
+
+  server.listen(3000, () =>
+    console.log('MediaSoup corriendo en puerto 3000')
+  );
+})();
