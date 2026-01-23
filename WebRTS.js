@@ -1,27 +1,60 @@
-const mediasoup = require('mediasoup');
-const express = require('express');
-const http = require('http');
-const { Server } = require('socket.io');
-const config = require('./config');
+// server.js
+import http from 'http';
+import mediasoup from 'mediasoup';
 
-(async () => {
-  const app = express();
-  const server = http.createServer(app);
-  const io = new Server(server);
+const PORT = 3000;
+const HOST = '0.0.0.0';
 
-  const worker = await mediasoup.createWorker(config.mediasoup.worker);
-  const router = await worker.createRouter(config.mediasoup.router);
+// ---- MediaSoup config mínima ----
+const mediasoupConfig = {
+  worker: {
+    rtcMinPort: 40000,
+    rtcMaxPort: 40100,
+  },
+  router: {
+    mediaCodecs: [
+      {
+        kind: 'audio',
+        mimeType: 'audio/opus',
+        clockRate: 48000,
+        channels: 2
+      }
+    ]
+  }
+};
 
-  io.on('connection', socket => {
-    console.log('Cliente conectado');
+let worker;
+let router;
 
-    socket.on('getRtpCapabilities', (_, cb) => {
-      cb(router.rtpCapabilities);
-    });
+// ---- HTTP Server ----
+const server = http.createServer((req, res) => {
+  res.writeHead(200, { 'Content-Type': 'text/plain' });
+  res.end('MediaSoup server is running 🚀');
+});
+
+// ---- Bootstrap ----
+async function start() {
+  console.log('🚀 Starting MediaSoup server...');
+
+  worker = await mediasoup.createWorker(mediasoupConfig.worker);
+
+  worker.on('died', () => {
+    console.error('❌ MediaSoup worker died, exiting...');
+    process.exit(1);
   });
 
-  server.listen(3000 () => {
-    console.log('MediaSoup corriendo en puerto 3000')
-  )};
-  
-})();
+  router = await worker.createRouter({
+    mediaCodecs: mediasoupConfig.router.mediaCodecs
+  });
+
+  console.log('✅ MediaSoup Worker PID:', worker.pid);
+  console.log('✅ MediaSoup Router created');
+
+  server.listen(PORT, HOST, () => {
+    console.log(`🌐 HTTP listening on http://${HOST}:${PORT}`);
+  });
+}
+
+start().catch(err => {
+  console.error('❌ Failed to start server:', err);
+});
