@@ -1,16 +1,19 @@
 {
-  "name": "nodejs-app",
+  "name": "mediasoup-server",
   "version": "1.0.0",
-  "description": "A minimal Node.js web application.",
-  "main": "index.js",
-  "author": "alphasec",
-  "license": "MIT",
+  "description": "MediaSoup WebRTC Server",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "NODE_ENV=development node server.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "dependencies": {
-     "express": "^4.19.2",
+    "express": "^4.19.2",
     "socket.io": "^4.7.5",
     "mediasoup": "^3.12.16"
-  },
-  "scripts": {
-    "start": "node index.js"
   }
 }
