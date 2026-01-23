@@ -21,7 +21,7 @@ const mediasoupConfig = {
     ]
   },
   webRtcTransport: {
-    listenIps: [{ ip: '0.0.0.0', announcedIp: null }],
+    listenIps: [{ ip: '0.0.0.0', announcedIp: "http://centerbeam.proxy.rlwy.net:35993" }],
     enableUdp: true,
     enableTcp: true,
     preferUdp: true
