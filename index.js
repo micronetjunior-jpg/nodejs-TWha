@@ -20,10 +20,8 @@ const config = require('./config');
     });
   });
 
-  server.listen(5000, () =>
+  server.listen(5050, () =>
     console.log('MediaSoup corriendo en puerto 3000')
   );
-  server.listen(9000, () =>
-    print("Server Ok")
-    );
+  
 })();
