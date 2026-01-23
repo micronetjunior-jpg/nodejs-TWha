@@ -1,11 +1,11 @@
 // server.js
 import http from 'http';
+import { Server } from 'socket.io';
 import mediasoup from 'mediasoup';
 
 const PORT = 3000;
 const HOST = '0.0.0.0';
 
-// ---- MediaSoup config mínima ----
 const mediasoupConfig = {
   worker: {
     rtcMinPort: 40000,
@@ -20,26 +20,31 @@ const mediasoupConfig = {
         channels: 2
       }
     ]
+  },
+  webRtcTransport: {
+    listenIps: [
+      { ip: '0.0.0.0', announcedIp: null } // luego pondremos IP pública
+    ],
+    enableUdp: true,
+    enableTcp: true,
+    preferUdp: true
   }
 };
 
 let worker;
 let router;
 
-// ---- HTTP Server ----
-const server = http.createServer((req, res) => {
-  res.writeHead(200, { 'Content-Type': 'text/plain' });
-  res.end('MediaSoup server is running 🚀');
+// ---- HTTP + WS ----
+const httpServer = http.createServer();
+const io = new Server(httpServer, {
+  cors: { origin: '*' }
 });
 
-// ---- Bootstrap ----
 async function start() {
-  console.log('🚀 Starting MediaSoup server...');
-
   worker = await mediasoup.createWorker(mediasoupConfig.worker);
 
   worker.on('died', () => {
-    console.error('❌ MediaSoup worker died, exiting...');
+    console.error('❌ MediaSoup worker died');
     process.exit(1);
   });
 
@@ -47,14 +52,34 @@ async function start() {
     mediaCodecs: mediasoupConfig.router.mediaCodecs
   });
 
-  console.log('✅ MediaSoup Worker PID:', worker.pid);
-  console.log('✅ MediaSoup Router created');
+  console.log('✅ MediaSoup ready');
 
-  server.listen(PORT, HOST, () => {
-    console.log(`🌐 HTTP listening on http://${HOST}:${PORT}`);
+  io.on('connection', socket => {
+    console.log('🔌 Client connected:', socket.id);
+
+    // 1️⃣ Enviar capacidades RTP
+    socket.on('getRtpCapabilities', (_, cb) => {
+      cb(router.rtpCapabilities);
+    });
+
+    // 2️⃣ Crear WebRTC Transport
+    socket.on('createTransport', async (_, cb) => {
+      const transport = await router.createWebRtcTransport(
+        mediasoupConfig.webRtcTransport
+      );
+
+      cb({
+        id: transport.id,
+        iceParameters: transport.iceParameters,
+        iceCandidates: transport.iceCandidates,
+        dtlsParameters: transport.dtlsParameters
+      });
+    });
+  });
+
+  httpServer.listen(PORT, HOST, () => {
+    console.log(`🚀 Server listening on ${HOST}:${PORT}`);
   });
 }
 
-start().catch(err => {
-  console.error('❌ Failed to start server:', err);
-});
+start();
