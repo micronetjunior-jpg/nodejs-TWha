@@ -2,11 +2,10 @@ import http from 'http';
 import { WebSocketServer } from 'ws';
 import mediasoup from 'mediasoup';
 import prism from 'prism-media'; // para convertir PCM a Opus
+import prism from 'prism-media';
 
 const PORT = 3000;
 const HOST = '0.0.0.0';
-
-import prism from 'prism-media';
 
 const opusEncoder = new prism.opus.Encoder({
   rate: 48000,
