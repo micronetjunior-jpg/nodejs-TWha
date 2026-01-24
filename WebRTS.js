@@ -6,12 +6,12 @@ import prism from 'prism-media'; // para convertir PCM a Opus
 const PORT = 3000;
 const HOST = '0.0.0.0';
 
+// Encoder Opus usando opusscript (no depende de node-opus)
 const opusEncoder = new prism.opus.Encoder({
   rate: 48000,
   channels: 2,
   frameSize: 960,
-  type: 'opus',
-  encoder: 'opusscript'  // fuerza usar opusscript
+  encoder: 'opusscript' // <--- aquí
 });
 
 const mediasoupConfig = {
