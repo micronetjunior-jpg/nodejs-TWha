@@ -60,20 +60,21 @@ wss.on('connection', ws => {
 
   let opusEncoder = new prism.opus.Encoder({ rate: 48000, channels: 2, frameSize: 960 });
 
-  ws.on('message', async message => {
-    // message = bytes PCM float32
-    try {
-      // Convertir a Opus
-      const opusChunk = opusEncoder.encode(message);
-      // Aquí puedes producir hacia MediaSoup transport:
-      // const transport = [...transports.values()][0];
-      // transport.produce({ kind: 'audio', rtpParameters: {...}, ... });
-      // Para pruebas, solo logueamos
-      console.log('Chunk PCM recibido, convertido a Opus, bytes:', opusChunk.length);
-    } catch (err) {
-      console.error('Error procesando audio:', err);
-    }
-  });
+  ws.on('message', message => {
+  try {
+    // message = PCM float32 bytes
+    // Pipear PCM al encoder
+    opusEncoder.write(message);  
+
+    // Si quieres capturar los chunks Opus para producir en MediaSoup:
+    opusEncoder.on('data', (chunk) => {
+      console.log('Chunk Opus listo, bytes:', chunk.length);
+      // Aquí produce en MediaSoup transport
+    });
+  } catch (err) {
+    console.error('Error procesando audio:', err);
+  }
+});
 
   ws.on('close', () => console.log('❌ Cliente WebSocket desconectado'));
 });
