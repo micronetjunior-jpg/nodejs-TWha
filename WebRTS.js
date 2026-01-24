@@ -36,7 +36,7 @@ const server = http.createServer(async (req, res) => {
       iceParameters: transport.iceParameters,
       iceCandidates: transport.iceCandidates,
       dtlsParameters: transport.dtlsParameters,
-      websocket: `ws://${HOST}:${PORT}/audio`
+      websocket: "ws://${HOST}:${PORT}/audio"
     });
   }
 
