@@ -56,29 +56,24 @@ const server = http.createServer(async (req, res) => {
 const wss = new WebSocketServer({ server, path: '/audio' });
 
 wss.on('connection', ws => {
-  console.log('🌐 Cliente WebSocket conectado');
+  console.log('Cliente conectado');
+  
+  // Encoder Opus tipo stream
+  const opusEncoder = new prism.opus.Encoder({ rate: 48000, channels: 2, frameSize: 960, encoder: 'opusscript' });
 
-  let opusEncoder = new prism.opus.Encoder({ rate: 48000, channels: 2, frameSize: 960 });
+  // Solo un listener para todo el flujo
+  opusEncoder.on('data', chunk => {
+    // Aquí va tu MediaSoup produce
+    console.log('Chunk Opus listo, bytes:', chunk.length);
+  });
 
   ws.on('message', message => {
-  try {
-    // message = PCM float32 bytes
-    // Pipear PCM al encoder
-    opusEncoder.write(message);  
+    // Enviar PCM al encoder
+    opusEncoder.write(message);
+  });
 
-    // Si quieres capturar los chunks Opus para producir en MediaSoup:
-    opusEncoder.on('data', (chunk) => {
-      console.log('Chunk Opus listo, bytes:', chunk.length);
-      // Aquí produce en MediaSoup transport
-    });
-  } catch (err) {
-    console.error('Error procesando audio:', err);
-  }
+  ws.on('close', () => console.log('Cliente desconectado'));
 });
-
-  ws.on('close', () => console.log('❌ Cliente WebSocket desconectado'));
-});
-
 // ---- Bootstrap ----
 async function start() {
   worker = await mediasoup.createWorker(mediasoupConfig.worker);
