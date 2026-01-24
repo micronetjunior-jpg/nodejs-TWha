@@ -1,30 +1,24 @@
 import http from 'http';
 import { WebSocketServer } from 'ws';
 import mediasoup from 'mediasoup';
-import prism from 'prism-media'; // para convertir PCM a Opus
+import prism from 'prism-media';
 
 const PORT = 3000;
 const HOST = '0.0.0.0';
 
-// Encoder Opus usando opusscript (no depende de node-opus)
-const opusEncoder = new prism.opus.Encoder({
-  rate: 48000,
-  channels: 2,
-  frameSize: 960,
-  encoder: 'opusscript' // <--- aquí
-});
-
 const mediasoupConfig = {
   worker: { rtcMinPort: 40000, rtcMaxPort: 40100 },
   router: { mediaCodecs: [{ kind: 'audio', mimeType: 'audio/opus', clockRate: 48000, channels: 2 }] },
-  webRtcTransport: { listenIps: [{ ip: '0.0.0.0', announcedIp: 'centerbeam.proxy.rlwy.net' }], enableUdp: true, enableTcp: true, preferUdp: true }
+  webRtcTransport: { 
+    listenIps: [{ ip: '0.0.0.0', announcedIp: 'centerbeam.proxy.rlwy.net' }],
+    enableUdp: true,
+    enableTcp: true,
+    preferUdp: true
+  }
 };
 
-let worker;
-let router;
-let transports = new Map();
+let worker, router, transports = new Map();
 
-// ---- Utils ----
 function json(res, data) {
   res.writeHead(200, { 'Content-Type': 'application/json' });
   res.end(JSON.stringify(data));
@@ -44,7 +38,7 @@ const server = http.createServer(async (req, res) => {
       iceParameters: transport.iceParameters,
       iceCandidates: transport.iceCandidates,
       dtlsParameters: transport.dtlsParameters,
-      websocket: "ws://${HOST}:${PORT}/audio"
+      websocket: `ws://${HOST}:${PORT}/audio`
     });
   }
 
@@ -56,24 +50,29 @@ const server = http.createServer(async (req, res) => {
 const wss = new WebSocketServer({ server, path: '/audio' });
 
 wss.on('connection', ws => {
-  console.log('Cliente conectado');
-  
-  // Encoder Opus tipo stream
-  const opusEncoder = new prism.opus.Encoder({ rate: 48000, channels: 2, frameSize: 960, encoder: 'opusscript' });
+  console.log('🌐 Cliente WebSocket conectado');
 
-  // Solo un listener para todo el flujo
+  // Encoder Opus usando opusscript (compatible en Railway)
+  const opusEncoder = new prism.opus.Encoder({
+    rate: 48000,
+    channels: 2,
+    frameSize: 960,
+    encoder: 'opusscript'
+  });
+
   opusEncoder.on('data', chunk => {
-    // Aquí va tu MediaSoup produce
+    // Aquí se produciría en MediaSoup
     console.log('Chunk Opus listo, bytes:', chunk.length);
+    // transport.produce({ kind: 'audio', rtpParameters: {...}, ... });
   });
 
   ws.on('message', message => {
-    // Enviar PCM al encoder
-    opusEncoder.write(message);
+    opusEncoder.write(message);  // PCM -> Opus
   });
 
-  ws.on('close', () => console.log('Cliente desconectado'));
+  ws.on('close', () => console.log('❌ Cliente WebSocket desconectado'));
 });
+
 // ---- Bootstrap ----
 async function start() {
   worker = await mediasoup.createWorker(mediasoupConfig.worker);
