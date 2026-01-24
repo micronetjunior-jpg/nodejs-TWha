@@ -6,6 +6,16 @@ import prism from 'prism-media'; // para convertir PCM a Opus
 const PORT = 3000;
 const HOST = '0.0.0.0';
 
+import prism from 'prism-media';
+
+const opusEncoder = new prism.opus.Encoder({
+  rate: 48000,
+  channels: 2,
+  frameSize: 960,
+  type: 'opus',
+  encoder: 'opusscript'  // fuerza usar opusscript
+});
+
 const mediasoupConfig = {
   worker: { rtcMinPort: 40000, rtcMaxPort: 40100 },
   router: { mediaCodecs: [{ kind: 'audio', mimeType: 'audio/opus', clockRate: 48000, channels: 2 }] },
