@@ -53,7 +53,7 @@ app.post("/call/start", async (_, res) => {
     transport = await router.createPlainTransport({
       listenIp: {
         ip: "0.0.0.0",
-        announcedIp: "nodejs-production-83139.up.railway.app";// ← dominio o IP pública
+        announcedIp: "nodejs-production-83139.up.railway.app"// ← dominio o IP pública
       },
       rtcpMux: true,
       comedia: true
