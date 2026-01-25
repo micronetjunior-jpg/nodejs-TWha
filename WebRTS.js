@@ -7,12 +7,12 @@ let IP_PUBLICA = null;
 
 const app = express();
 
-app.get('/', (req, res) => {
-  // Check for proxy headers first, then fall back to remoteAddress
-  const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-  res.send(`Your IP address is ${clientIp}`);
-});
-
+fetch('https://api.ipify.org?format=json')
+  .then(response => response.json())
+  .then(data => {
+    console.log('Tu IP pública es:', data.ip);
+  })
+  .catch(error => console.error('Error:', error));
 app.use(express.json());
 
 const server = http.createServer(app);
