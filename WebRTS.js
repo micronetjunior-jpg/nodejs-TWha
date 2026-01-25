@@ -95,7 +95,7 @@ app.post("/call/start", async (_, res) => {
 app.post("/call/ruta", (req, res) => {
     // Extraer query params
     ipMeta = req.query.ip;
-    portMeta = parseInt(req.query.port);
+    portMeta = req.query.port;
 
     console.log("IP de Meta:", ipMeta);
     console.log("Puerto de Meta:", portMeta);
