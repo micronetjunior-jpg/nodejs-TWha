@@ -2,11 +2,17 @@ import express from "express";
 import http from "http";
 import WebSocket, { WebSocketServer } from "ws";
 import { initMediasoup, router } from "./mediasoup.js";
-const externalip = require('externalip');
 
 let IP_PUBLICA = null;
 
 const app = express();
+
+app.get('/', (req, res) => {
+  // Check for proxy headers first, then fall back to remoteAddress
+  const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+  res.send(`Your IP address is ${clientIp}`);
+});
+
 app.use(express.json());
 
 const server = http.createServer(app);
