@@ -4,10 +4,16 @@ import mediasoup from 'mediasoup';
 const PORT = 3000;
 const HOST = '0.0.0.0';
 
-const mediasoupConfig = {
+let worker;
+let router;
+let plainTransport;
+let producer;
+
+// ---- MediaSoup config ----
+const config = {
   worker: {
     rtcMinPort: 40000,
-    rtcMaxPort: 40100,
+    rtcMaxPort: 40100
   },
   router: {
     mediaCodecs: [
@@ -15,48 +21,56 @@ const mediasoupConfig = {
         kind: 'audio',
         mimeType: 'audio/opus',
         clockRate: 48000,
-        channels: 2
+        channels: 1
       }
     ]
-  },
-  webRtcTransport: {
-    listenIps: [{ ip: '0.0.0.0', announcedIp: "http://centerbeam.proxy.rlwy.net:35993" }],
-    enableUdp: true,
-    enableTcp: true,
-    preferUdp: true
   }
 };
 
-let worker;
-let router;
-
-// ---- Utils ----
+// ---- Helper ----
 function json(res, data) {
   res.writeHead(200, { 'Content-Type': 'application/json' });
   res.end(JSON.stringify(data));
 }
 
-// ---- Server ----
+// ---- HTTP Server ----
 const server = http.createServer(async (req, res) => {
-  if (req.method === 'GET' && req.url === '/health') {
-    return json(res, { status: 'ok', mediasoup: true });
-  }
 
-  if (req.method === 'GET' && req.url === '/rtp-capabilities') {
-    return json(res, router.rtpCapabilities);
-  }
+  // 1️⃣ Crear RTP entrada
+  if (req.method === 'POST' && req.url === '/create-tts-transport') {
 
-  if (req.method === 'POST' && req.url === '/create-transport') {
-    const transport = await router.createWebRtcTransport(
-      mediasoupConfig.webRtcTransport
-    );
+    plainTransport = await router.createPlainTransport({
+      listenIp: '0.0.0.0',
+      rtcpMux: true,
+      comedia: true   // MediaSoup aprende IP/puerto remoto solo
+    });
+
+    producer = await plainTransport.produce({
+      kind: 'audio',
+      rtpParameters: {
+        codecs: [
+          {
+            mimeType: 'audio/opus',
+            payloadType: 111,
+            clockRate: 48000,
+            channels: 1
+          }
+        ],
+        encodings: [{ ssrc: 22222222 }]
+      }
+    });
 
     return json(res, {
-      id: transport.id,
-      iceParameters: transport.iceParameters,
-      iceCandidates: transport.iceCandidates,
-      dtlsParameters: transport.dtlsParameters
+      transportId: plainTransport.id,
+      rtpIp: plainTransport.tuple.localIp,
+      rtpPort: plainTransport.tuple.localPort,
+      codec: 'opus'
     });
+  }
+
+  // Health
+  if (req.method === 'GET' && req.url === '/health') {
+    return json(res, { status: 'ok' });
   }
 
   res.writeHead(404);
@@ -65,15 +79,16 @@ const server = http.createServer(async (req, res) => {
 
 // ---- Bootstrap ----
 async function start() {
-  worker = await mediasoup.createWorker(mediasoupConfig.worker);
+  worker = await mediasoup.createWorker(config.worker);
+
   router = await worker.createRouter({
-    mediaCodecs: mediasoupConfig.router.mediaCodecs
+    mediaCodecs: config.router.mediaCodecs
   });
 
   console.log('✅ MediaSoup listo');
 
   server.listen(PORT, HOST, () => {
-    console.log(`🚀 HTTP server on http://${HOST}:${PORT}`);
+    console.log(`🚀 Server on http://${HOST}:${PORT}`);
   });
 }
 
