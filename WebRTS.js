@@ -1,95 +1,102 @@
-import http from 'http';
-import mediasoup from 'mediasoup';
+import express from "express";
+import http from "http";
+import WebSocket, { WebSocketServer } from "ws";
+import { initMediasoup, router } from "./mediasoup.js";
 
+const app = express();
+app.use(express.json());
+
+const server = http.createServer(app);
 const PORT = 3000;
-const HOST = '0.0.0.0';
 
-let worker;
-let router;
-let plainTransport;
-let producer;
+// ─────────────────────────────
+// WebSocket con Python
+// ─────────────────────────────
+let pythonWS = null;
 
-// ---- MediaSoup config ----
-const config = {
-  worker: {
-    rtcMinPort: 40000,
-    rtcMaxPort: 40100
-  },
-  router: {
-    mediaCodecs: [
-      {
-        kind: 'audio',
-        mimeType: 'audio/opus',
-        clockRate: 48000,
-        channels: 1
-      }
-    ]
-  }
-};
+const wss = new WebSocketServer({ server });
 
-// ---- Helper ----
-function json(res, data) {
-  res.writeHead(200, { 'Content-Type': 'application/json' });
-  res.end(JSON.stringify(data));
-}
+wss.on("connection", ws => {
+  pythonWS = ws;
+  console.log("🐍 Python conectado");
 
-// ---- HTTP Server ----
-const server = http.createServer(async (req, res) => {
-
-  // 1️⃣ Crear RTP entrada
-  if (req.method === 'POST' && req.url === '/create-tts-transport') {
-
-    plainTransport = await router.createPlainTransport({
-      listenIp: '0.0.0.0',
-      rtcpMux: true,
-      comedia: true   // MediaSoup aprende IP/puerto remoto solo
-    });
-
-    producer = await plainTransport.produce({
-      kind: 'audio',
-      rtpParameters: {
-        codecs: [
-          {
-            mimeType: 'audio/opus',
-            payloadType: 111,
-            clockRate: 48000,
-            channels: 1
-          }
-        ],
-        encodings: [{ ssrc: 22222222 }]
-      }
-    });
-
-    return json(res, {
-      transportId: plainTransport.id,
-      rtpIp: plainTransport.tuple.localIp,
-      rtpPort: plainTransport.tuple.localPort,
-      codec: 'opus'
-    });
-  }
-
-  // Health
-  if (req.method === 'GET' && req.url === '/health') {
-    return json(res, { status: 'ok' });
-  }
-
-  res.writeHead(404);
-  res.end();
+  ws.on("close", () => {
+    pythonWS = null;
+    console.log("🐍 Python desconectado");
+  });
 });
 
-// ---- Bootstrap ----
-async function start() {
-  worker = await mediasoup.createWorker(config.worker);
+// ─────────────────────────────
+// MediaSoup state
+// ─────────────────────────────
+let transport;
+let producer;
 
-  router = await worker.createRouter({
-    mediaCodecs: config.router.mediaCodecs
+// ─────────────────────────────
+// Crear llamada
+// ─────────────────────────────
+app.post("/call/start", async (_, res) => {
+  transport = await router.createPlainTransport({
+    listenIp: {
+      ip: "0.0.0.0",
+      announcedIp: process.env.PUBLIC_IP
+    },
+    rtcpMux: true,
+    comedia: true
   });
 
-  console.log('✅ MediaSoup listo');
-
-  server.listen(PORT, HOST, () => {
-    console.log(`🚀 Server on http://${HOST}:${PORT}`);
+  producer = await transport.produce({
+    kind: "audio",
+    rtpParameters: {
+      codecs: [
+        {
+          mimeType: "audio/opus",
+          payloadType: 100,
+          clockRate: 48000,
+          channels: 2
+        }
+      ],
+      encodings: [{ ssrc: 11111111 }]
+    }
   });
-}
 
-start();
+  console.log("📞 Llamada lista");
+  console.log("🎯 RTP PORT:", transport.tuple.localPort);
+
+  // Avisar a Python que ya puede hablar
+  pythonWS?.send(JSON.stringify({
+    type: "CALL_READY",
+    rtp: {
+      ip: transport.tuple.localIp,
+      port: transport.tuple.localPort
+    }
+  }));
+
+  res.json({
+    status: "ready",
+    rtpPort: transport.tuple.localPort
+  });
+});
+
+// ─────────────────────────────
+// Audio OPUS desde Python
+// ─────────────────────────────
+wss.on("connection", ws => {
+  ws.on("message", msg => {
+    if (Buffer.isBuffer(msg)) {
+      // Aquí normalmente NO haces nada:
+      // MediaSoup recibe el RTP directamente
+      // Este canal es solo control / debug
+    }
+  });
+});
+
+// ─────────────────────────────
+// Init
+// ─────────────────────────────
+(async () => {
+  await initMediasoup();
+  server.listen(PORT, () =>
+    console.log(`🚀 Server en http://localhost:${PORT}`)
+  );
+})();
