@@ -3,7 +3,7 @@ import http from "http";
 import WebSocket, { WebSocketServer } from "ws";
 import { initMediasoup, router } from "./mediasoup.js";
 
-let ipPublica = null;
+let ipPublica = "";
 
 const app = express();
 
