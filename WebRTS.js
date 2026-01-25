@@ -56,8 +56,7 @@ app.post("/call/start", async (req, res) => {
         announcedIp: ipMeta// ← dominio o IP pública
       },
       rtcpMux: true,
-      comedia: true,
-      port: portMeta
+      comedia: true
     });
 
     // 2️⃣ Crear producer OPUS
