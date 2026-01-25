@@ -4,7 +4,7 @@ import WebSocket, { WebSocketServer } from "ws";
 import { initMediasoup, router } from "./mediasoup.js";
 const axios = require('axios');
 
-const app = express();
+//const app = express();
 
 app.use(express.json());
 
@@ -92,7 +92,7 @@ app.post("/call/start", async (_, res) => {
 });
 
 
-
+/*
 async function getPublicIP() {
   try {
     const response = await axios.get('https://api.ipify.org?format=json');
@@ -102,12 +102,19 @@ async function getPublicIP() {
     console.error('Error al obtener la IP:', error);
   }
 }
+*/
 
 // ─────────────────────────────
 // Init server + mediasoup
 // ─────────────────────────────
 (async () => {
-  await getPublicIP();
+  
+  app.get('/', (req, res) => {
+  IP_PUBLICA = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+  res.send(`Tu IP es: ${IP_PUBLICA}`);
+  });
+
+  //await getPublicIP();
   console.log("IP: ${IP_PUBLICA}");
   await initMediasoup();
 
