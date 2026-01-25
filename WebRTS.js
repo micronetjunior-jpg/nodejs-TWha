@@ -4,10 +4,10 @@ import WebSocket, { WebSocketServer } from "ws";
 import { initMediasoup, router } from "./mediasoup.js";
 //const axios = require('axios');
 
+let IP_PUBLICA = null;
+
 const app = express();
-
 app.use(express.json());
-
 app.get('/', (req, res) => {
   IP_PUBLICA = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
   res.send(`Tu IP es: ${IP_PUBLICA}`);
@@ -15,7 +15,6 @@ app.get('/', (req, res) => {
 
 const server = http.createServer(app);
 const PORT = 3000;
-let IP_PUBLICA = null;
 
 // ─────────────────────────────
 // WebSocket con Python (control)
