@@ -57,7 +57,7 @@ app.post("/call/start", async (req, res) => {
       },
       rtcpMux: true,
       comedia: true,
-      port: portMet
+      port: portMeta
     });
 
     // 2️⃣ Crear producer OPUS
