@@ -3,8 +3,7 @@ import http from "http";
 import WebSocket, { WebSocketServer } from "ws";
 import { initMediasoup, router } from "./mediasoup.js";
 
-let ipMeta = null;
-let portMeta = null;
+let ipPublica = null;
 
 const app = express();
 
@@ -43,21 +42,18 @@ app.post("/call/start", async (req, res) => {
   try {
     console.log("📞 Iniciando llamada");
     
-    ipMeta = req.query.ip;
-    portMeta = parseInt(req.query.port);
+    ipPublica = req.query.ip;
     
-    console.log(ipMeta);
-    console.log(portMeta);
+    console.log(ipPublica);
   
     // 1️⃣ Crear transport RTP
     transport = await router.createPlainTransport({
       listenIp: {
         ip: "0.0.0.0",
-        announcedIp: ipMeta// ← dominio o IP pública
+        announcedIp: ipPublica// ← dominio o IP pública
       },
       rtcpMux: true,
-      comedia: true,
-      port: portMeta
+      comedia: true
     });
 
     // 2️⃣ Crear producer OPUS
