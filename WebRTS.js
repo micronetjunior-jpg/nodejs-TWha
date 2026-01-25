@@ -107,7 +107,7 @@ app.post("/call/start", async (req, res) => {
 
 http.get({'host': 'api.ipify.org', 'port': 80, 'path': '/'}, function(resp) {
   resp.on('data', function(ip) {
-    ipPublica=ip;
+    ipPublica=String(ip);
     console.log("My public IP address is: " + ip);
   });
 });
