@@ -102,8 +102,10 @@ app.post("/call/start", async (req, res) => {
 (async () => {
   fetch('https://api.ipify.org?format=json')
   .then(response => response.json())
-  .then(data => ipPublica=data.ip; console.log('IP Pública:', data.ip))
+  .then(data => ipPublica=data.ip)
   .catch(error => console.error('Error:', error));
+
+  console.log(ipPublica)
 
   await initMediasoup();
   server.listen(PORT, () => {
