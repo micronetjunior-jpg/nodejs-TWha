@@ -3,18 +3,10 @@ import http from "http";
 import WebSocket, { WebSocketServer } from "ws";
 import { initMediasoup, router } from "./mediasoup.js";
 
-let ipMeta;
-let portMeta;
+let ipMeta = null
+let portMeta  null;
 
 const app = express();
-
-fetch('https://api.ipify.org?format=json')
-  .then(response => response.json())
-  .then(data => {
-    IP_PUBLICA = data.ip;
-    console.log('Tu IP pública es:', IP_PUBLICA);
-  })
-  .catch(error => console.error('Error:', error));
 
 app.use(express.json());
 
@@ -47,7 +39,7 @@ let producer = null;
 // ─────────────────────────────
 // Crear llamada (RTP)
 // ─────────────────────────────
-app.post("/call/start", async (_, res) => {
+async function contestar() {
   try {
     console.log("📞 Iniciando llamada");
     // 1️⃣ Crear transport RTP
@@ -107,29 +99,14 @@ app.post("/call/ruta", (req, res) => {
 
     console.log("IP de Meta:", ipMeta);
     console.log("Puerto de Meta:", portMeta);
-
-    // Aquí puedes usar ipMeta y portMeta para enviar RTP
-    res.send({ status: "ok", ip: ipMeta, port: portMeta });
+    contestar();
 });
-
-/*
-async function getPublicIP() {
-  try {
-    const response = await axios.get('https://api.ipify.org?format=json');
-    IP_PUBLICA = response.data.ip;
-    console.log('IP Pública:', response.data.ip);
-  } catch (error) {
-    console.error('Error al obtener la IP:', error);
-  }
-}
-*/
 
 // ─────────────────────────────
 // Init server + mediasoup
 // ─────────────────────────────
 (async () => {
   await initMediasoup();
-
   server.listen(PORT, () => {
     console.log(`🚀 Node RTP Server en http://0.0.0.0:${PORT}`);
   });
