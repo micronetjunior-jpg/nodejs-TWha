@@ -90,7 +90,7 @@ app.post("/call/start", async (_, res) => {
     console.error("❌ Error creando llamada:", err);
     res.status(500).json({ error: "call_start_failed" });
   }
-};
+});
 
 app.post("/call/ruta", (req, res) => {
     // Extraer query params
