@@ -1,5 +1,5 @@
 module.exports = {
-  listenIp: 'centerbeam.proxy.rlwy.net:35993',
+  listenIp: 'http://centerbeam.proxy.rlwy.net:35993',
 
   mediasoup: {
     worker: {
@@ -22,7 +22,7 @@ module.exports = {
       listenIps: [
         {
           ip: '0.0.0.0',
-          announcedIp: 'centerbeam.proxy.rlwy.net:35993'
+          announcedIp: 'http://centerbeam.proxy.rlwy.net:35993'
         }
       ],
       enableUdp: true,
