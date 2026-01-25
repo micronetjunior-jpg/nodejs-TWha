@@ -10,9 +10,11 @@ const app = express();
 fetch('https://api.ipify.org?format=json')
   .then(response => response.json())
   .then(data => {
-    console.log('Tu IP pública es:', data.ip);
+    IP_PUBLICA = data.ip;
+    console.log('Tu IP pública es:', IP_PUBLICA);
   })
   .catch(error => console.error('Error:', error));
+
 app.use(express.json());
 
 const server = http.createServer(app);
@@ -114,8 +116,6 @@ async function getPublicIP() {
 // Init server + mediasoup
 // ─────────────────────────────
 (async () => {
-  //await getPublicIP();
-  console.log("IP: "+ IP_PUBLICA);
   await initMediasoup();
 
   server.listen(PORT, () => {
