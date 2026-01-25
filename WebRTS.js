@@ -18,14 +18,6 @@ app.use(express.json());
 const server = http.createServer(app);
 const PORT = 3000;
 
-externalip(function (err, ip) {
-  if (err) {
-    console.error(err);
-  } else {
-    console.log('Tu IP pública es:', ip); // => 8.8.8.8
-  }
-});
-
 // ─────────────────────────────
 // WebSocket con Python (control)
 // ─────────────────────────────
