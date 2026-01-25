@@ -39,7 +39,7 @@ let producer = null;
 // ─────────────────────────────
 // Crear llamada (RTP)
 // ─────────────────────────────
-async function contestar() {
+app.post("/call/start", async (_, res) => {
   try {
     console.log("📞 Iniciando llamada");
     // 1️⃣ Crear transport RTP
