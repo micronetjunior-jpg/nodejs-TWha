@@ -3,7 +3,8 @@ import http from "http";
 import WebSocket, { WebSocketServer } from "ws";
 import { initMediasoup, router } from "./mediasoup.js";
 
-let IP_PUBLICA = null;
+let ipMeta;
+let portMeta;
 
 const app = express();
 
@@ -99,6 +100,17 @@ app.post("/call/start", async (_, res) => {
   }
 });
 
+app.post("/call/ruta", (req, res) => {
+    // Extraer query params
+    ipMeta = req.query.ip;
+    portMeta = parseInt(req.query.port);
+
+    console.log("IP de Meta:", ipMeta);
+    console.log("Puerto de Meta:", portMeta);
+
+    // Aquí puedes usar ipMeta y portMeta para enviar RTP
+    res.send({ status: "ok", ip: ipMeta, port: portMeta });
+});
 
 /*
 async function getPublicIP() {
