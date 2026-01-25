@@ -16,16 +16,6 @@ let pythonWS = null;
 
 const wss = new WebSocketServer({ server });
 
-wss.on("connection", ws => {
-  pythonWS = ws;
-  console.log("🐍 Python conectado");
-
-  ws.on("close", () => {
-    pythonWS = null;
-    console.log("🐍 Python desconectado");
-  });
-});
-
 // ─────────────────────────────
 // MediaSoup state
 // ─────────────────────────────
@@ -82,12 +72,16 @@ app.post("/call/start", async (_, res) => {
 // Audio OPUS desde Python
 // ─────────────────────────────
 wss.on("connection", ws => {
+  pythonWS = ws;
+  console.log("🐍 Python conectado");
+
   ws.on("message", msg => {
-    if (Buffer.isBuffer(msg)) {
-      // Aquí normalmente NO haces nada:
-      // MediaSoup recibe el RTP directamente
-      // Este canal es solo control / debug
-    }
+    // control / debug
+  });
+
+  ws.on("close", () => {
+    pythonWS = null;
+    console.log("🐍 Python desconectado");
   });
 });
 
