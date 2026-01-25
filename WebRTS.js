@@ -99,7 +99,11 @@ app.post("/call/ruta", (req, res) => {
 
     console.log("IP de Meta:", ipMeta);
     console.log("Puerto de Meta:", portMeta);
-    contestar();
+    res.status(200).send({ 
+        status: "ok",      // indica que todo salió bien
+        message: "Datos recibidos correctamente",
+    });
+
 });
 
 // ─────────────────────────────
