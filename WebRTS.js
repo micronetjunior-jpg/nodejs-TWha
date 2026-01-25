@@ -100,11 +100,21 @@ app.post("/call/start", async (req, res) => {
 // Init server + mediasoup
 // ─────────────────────────────
 (async () => {
-  fetch('https://api.ipify.org?format=json')
-  .then(response => response.json())
-  .then(data => ipPublica=data.ip)
-  .catch(error => console.error('Error:', error));
+  
+  // Source - https://stackoverflow.com/a
+// Posted by mgear, modified by community. See post 'Timeline' for change history
+// Retrieved 2026-01-25, License - CC BY-SA 4.0
 
+var http = require('http');
+
+http.get({'host': 'api.ipify.org', 'port': 80, 'path': '/'}, function(resp) {
+  resp.on('data', function(ip) {
+    ipPublica=ip;
+    console.log("My public IP address is: " + ip);
+  });
+});
+
+  
   console.log(ipPublica)
 
   await initMediasoup();
