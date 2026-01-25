@@ -10,6 +10,7 @@ const app = express();
 app.use(express.json());
 app.get('/', (req, res) => {
   IP_PUBLICA = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+  console.log(IP_PUBLICA)
   res.send(`Tu IP es: ${IP_PUBLICA}`);
   });
 
