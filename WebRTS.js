@@ -100,12 +100,11 @@ app.post("/call/start", async (req, res) => {
 // Init server + mediasoup
 // ─────────────────────────────
 (async () => {
-  http.get({'host': 'api.ipify.org', 'port': 80, 'path': '/'}, function(resp) {
-    resp.on('data', function(ip) {
-      ipPublica = ip;
-      console.log("My public IP address is: " + ip);
-    });
-  });
+  fetch('https://api.ipify.org?format=json')
+  .then(response => response.json())
+  .then(data => ipPublica=data.ip; console.log('IP Pública:', data.ip))
+  .catch(error => console.error('Error:', error));
+
   await initMediasoup();
   server.listen(PORT, () => {
     console.log(`🚀 Node RTP Server en http://0.0.0.0:${PORT}`);
