@@ -105,8 +105,6 @@ app.post("/call/start", async (req, res) => {
 // Posted by mgear, modified by community. See post 'Timeline' for change history
 // Retrieved 2026-01-25, License - CC BY-SA 4.0
 
-var http = require('http');
-
 http.get({'host': 'api.ipify.org', 'port': 80, 'path': '/'}, function(resp) {
   resp.on('data', function(ip) {
     ipPublica=ip;
