@@ -45,7 +45,7 @@ app.post("/call/start", async (_, res) => {
     transport = await router.createPlainTransport({
       listenIp: {
         ip: "0.0.0.0",
-        announcedIp: IP_PUBLICA; // ← dominio o IP pública
+        announcedIp: IP_PUBLICA // ← dominio o IP pública
       },
       rtcpMux: true,
       comedia: true
