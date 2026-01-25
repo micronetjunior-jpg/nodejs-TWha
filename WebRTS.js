@@ -8,6 +8,11 @@ const app = express();
 
 app.use(express.json());
 
+app.get('/', (req, res) => {
+  IP_PUBLICA = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+  res.send(`Tu IP es: ${IP_PUBLICA}`);
+  });
+
 const server = http.createServer(app);
 const PORT = 3000;
 let IP_PUBLICA = null;
@@ -108,12 +113,6 @@ async function getPublicIP() {
 // Init server + mediasoup
 // ─────────────────────────────
 (async () => {
-  
-  app.get('/', (req, res) => {
-  IP_PUBLICA = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-  res.send(`Tu IP es: ${IP_PUBLICA}`);
-  });
-
   //await getPublicIP();
   console.log("IP: "+ IP_PUBLICA);
   await initMediasoup();
