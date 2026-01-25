@@ -4,7 +4,7 @@ import WebSocket, { WebSocketServer } from "ws";
 import { initMediasoup, router } from "./mediasoup.js";
 
 let ipMeta = null;
-let portMeta  null;
+let portMeta = null;
 
 const app = express();
 
