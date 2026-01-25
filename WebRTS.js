@@ -115,7 +115,7 @@ async function getPublicIP() {
   });
 
   //await getPublicIP();
-  console.log("IP: ${IP_PUBLICA}");
+  console.log("IP: "+ IP_PUBLICA);
   await initMediasoup();
 
   server.listen(PORT, () => {
