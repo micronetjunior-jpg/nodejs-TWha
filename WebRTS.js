@@ -42,7 +42,7 @@ app.post("/call/start", async (req, res) => {
   try {
     console.log("📞 Iniciando llamada");
     
-    ipPublica = req.query.ip;
+    //ipPublica = req.query.ip;
     
     console.log(ipPublica);
   
@@ -100,6 +100,12 @@ app.post("/call/start", async (req, res) => {
 // Init server + mediasoup
 // ─────────────────────────────
 (async () => {
+  http.get({'host': 'api.ipify.org', 'port': 80, 'path': '/'}, function(resp) {
+    resp.on('data', function(ip) {
+      ipPublica = ip;
+      console.log("My public IP address is: " + ip);
+    });
+  });
   await initMediasoup();
   server.listen(PORT, () => {
     console.log(`🚀 Node RTP Server en http://0.0.0.0:${PORT}`);
