@@ -2,12 +2,15 @@ import express from "express";
 import http from "http";
 import WebSocket, { WebSocketServer } from "ws";
 import { initMediasoup, router } from "./mediasoup.js";
+const axios = require('axios');
 
 const app = express();
+
 app.use(express.json());
 
 const server = http.createServer(app);
 const PORT = 3000;
+let IP_PUBLICA = null;
 
 // ─────────────────────────────
 // WebSocket con Python (control)
@@ -38,12 +41,11 @@ let producer = null;
 app.post("/call/start", async (_, res) => {
   try {
     console.log("📞 Iniciando llamada");
-
     // 1️⃣ Crear transport RTP
     transport = await router.createPlainTransport({
       listenIp: {
         ip: "0.0.0.0",
-        announcedIp: "nodejs-production-83139.up.railway.app" // ← dominio o IP pública
+        announcedIp: IP_PUBLICA; // ← dominio o IP pública
       },
       rtcpMux: true,
       comedia: true
@@ -89,10 +91,24 @@ app.post("/call/start", async (_, res) => {
   }
 });
 
+
+
+async function getPublicIP() {
+  try {
+    const response = await axios.get('https://api.ipify.org?format=json');
+    IP_PUBLICA = response.data.ip;
+    console.log('IP Pública:', response.data.ip);
+  } catch (error) {
+    console.error('Error al obtener la IP:', error);
+  }
+}
+
 // ─────────────────────────────
 // Init server + mediasoup
 // ─────────────────────────────
 (async () => {
+  await getPublicIP();
+  console.log("IP: ${IP_PUBLICA}");
   await initMediasoup();
 
   server.listen(PORT, () => {
