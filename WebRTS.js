@@ -96,6 +96,6 @@ app.post("/call/start", async (_, res) => {
   await initMediasoup();
 
   server.listen(PORT, () => {
-    console.log(`🚀 Node RTP Server en http://localhost:${PORT}`);
+    console.log(`🚀 Node RTP Server en http://0.0.0.0:${PORT}`);
   });
 })();
