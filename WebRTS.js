@@ -39,7 +39,7 @@ app.post("/call/start", async (_, res) => {
   transport = await router.createPlainTransport({
     listenIp: {
       ip: "0.0.0.0",
-      announcedIp: process.env.PUBLIC_IP
+      announcedIp: "http://centerbeam.proxy.rlwy.net:35993"
     },
     rtcpMux: true,
     comedia: true
