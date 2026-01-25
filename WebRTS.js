@@ -2,7 +2,7 @@ import express from "express";
 import http from "http";
 import WebSocket, { WebSocketServer } from "ws";
 import { initMediasoup, router } from "./mediasoup.js";
-//const axios = require('axios');
+const externalip = require('externalip');
 
 let IP_PUBLICA = null;
 
@@ -11,10 +11,15 @@ app.use(express.json());
 
 const server = http.createServer(app);
 const PORT = 3000;
-app.get('/', (req, res) => {
-  IP_PUBLICA = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-  console.log(IP_PUBLICA);
-  });
+
+externalip(function (err, ip) {
+  if (err) {
+    console.error(err);
+  } else {
+    console.log('Tu IP pública es:', ip); // => 8.8.8.8
+  }
+});
+
 // ─────────────────────────────
 // WebSocket con Python (control)
 // ─────────────────────────────
