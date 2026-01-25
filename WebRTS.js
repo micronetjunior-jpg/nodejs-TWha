@@ -71,7 +71,7 @@ app.post("/call/start", async (req, res) => {
             channels: 2
           }
         ],
-        encodings: [{ ssrc: 11111111 }]
+        encodings: [{ ssrc: 22222222 }]
       }
     });
 
