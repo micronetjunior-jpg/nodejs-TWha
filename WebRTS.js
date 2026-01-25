@@ -63,7 +63,7 @@ wss.on('connection', ws => {
   opusEncoder.on('data', chunk => {
     // Aquí se produciría en MediaSoup
     console.log('Chunk Opus listo, bytes:', chunk.length);
-    // transport.produce({ kind: 'audio', rtpParameters: {...}, ... });
+    transport.produce({ kind: 'audio', rtpParameters: {...}, ... });
   });
 
   ws.on('message', message => {
