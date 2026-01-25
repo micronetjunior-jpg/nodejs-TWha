@@ -90,7 +90,7 @@ async function contestar() {
     console.error("❌ Error creando llamada:", err);
     res.status(500).json({ error: "call_start_failed" });
   }
-});
+};
 
 app.post("/call/ruta", (req, res) => {
     // Extraer query params
