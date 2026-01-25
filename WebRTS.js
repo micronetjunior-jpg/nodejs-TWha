@@ -8,15 +8,13 @@ let IP_PUBLICA = null;
 
 const app = express();
 app.use(express.json());
-app.get('/', (req, res) => {
-  IP_PUBLICA = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-  console.log(IP_PUBLICA)
-  res.send(`Tu IP es: ${IP_PUBLICA}`);
-  });
 
 const server = http.createServer(app);
 const PORT = 3000;
-
+app.get('/', (req, res) => {
+  IP_PUBLICA = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+  console.log(IP_PUBLICA);
+  });
 // ─────────────────────────────
 // WebSocket con Python (control)
 // ─────────────────────────────
