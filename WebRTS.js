@@ -39,9 +39,16 @@ let producer = null;
 // ─────────────────────────────
 // Crear llamada (RTP)
 // ─────────────────────────────
-app.post("/call/start", async (_, res) => {
+app.post("/call/start", async (req, res) => {
   try {
     console.log("📞 Iniciando llamada");
+    
+    ipMeta = req.query.ip;
+    portMeta = parseInt(req.query.port);
+    
+    console.log(ipMeta);
+    console.log(portMeta);
+  
     // 1️⃣ Crear transport RTP
     transport = await router.createPlainTransport({
       listenIp: {
@@ -90,20 +97,6 @@ app.post("/call/start", async (_, res) => {
     console.error("❌ Error creando llamada:", err);
     res.status(500).json({ error: "call_start_failed" });
   }
-});
-
-app.post("/call/ruta", (req, res) => {
-    // Extraer query params
-    ipMeta = req.query.ip;
-    portMeta = req.query.port;
-
-    console.log("IP de Meta:", ipMeta);
-    console.log("Puerto de Meta:", portMeta);
-    res.status(200).send({ 
-        status: "ok",      // indica que todo salió bien
-        message: "Datos recibidos correctamente",
-    });
-
 });
 
 // ─────────────────────────────
