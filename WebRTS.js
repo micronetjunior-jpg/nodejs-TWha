@@ -2,9 +2,9 @@ import express from "express";
 import http from "http";
 import WebSocket, { WebSocketServer } from "ws";
 import { initMediasoup, router } from "./mediasoup.js";
-const axios = require('axios');
+//const axios = require('axios');
 
-//const app = express();
+const app = express();
 
 app.use(express.json());
 
