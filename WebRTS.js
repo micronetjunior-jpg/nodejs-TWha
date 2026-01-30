@@ -51,6 +51,8 @@ app.get("/info", (req, res) => {
 app.post("/call/start", async (req, res) => {
   try {
     console.log("📞 Iniciando llamada");
+
+    const { call_id } = req.body;
     
     ipPublica = process.env.PUBLIC_IP
     console.log(ipPublica);
@@ -90,7 +92,8 @@ app.post("/call/start", async (req, res) => {
       type: "RTP_READY",
       rtp: {
         ip: transport.tuple.localIp,
-        port: transport.tuple.localPort
+        port: transport.tuple.localPort,
+        call_id: call_id
       }
     }));
 
