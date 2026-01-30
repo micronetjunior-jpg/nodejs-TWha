@@ -35,6 +35,16 @@ wss.on("connection", ws => {
 let transport = null;
 let producer = null;
 
+app.get("/info", (req, res) => {
+  res.json({
+    publicIp: process.env.PUBLIC_IP,
+    rtp: {
+      codec: "opus",
+      clockRate: 48000
+    }
+  });
+});
+
 // ─────────────────────────────
 // Crear llamada (RTP)
 // ─────────────────────────────
@@ -42,15 +52,14 @@ app.post("/call/start", async (req, res) => {
   try {
     console.log("📞 Iniciando llamada");
     
-    //ipPublica = req.query.ip;
-    
+    ipPublica = process.env.PUBLIC_IP
     console.log(ipPublica);
   
     // 1️⃣ Crear transport RTP
     transport = await router.createPlainTransport({
       listenIp: {
         ip: "0.0.0.0",
-        announcedIp: ipPublica// ← dominio o IP pública
+        announcedIp: process.env.PUBLIC_IP// ← dominio o IP pública
       },
       rtcpMux: true,
       comedia: true
@@ -96,27 +105,35 @@ app.post("/call/start", async (req, res) => {
   }
 });
 
+function fetchPublicIp() 
+{
+  return new Promise((resolve, reject) => 
+  {
+    http.get(
+      { host: "api.ipify.org", port: 80, path: "/" },
+      resp => {
+        let data = "";
+
+        resp.on("data", chunk => data += chunk);
+        resp.on("end", () => resolve(data.trim()));
+      }
+    ).on("error", reject);
+  });
+}
+
 // ─────────────────────────────
 // Init server + mediasoup
 // ─────────────────────────────
-(async () => {
+(async () => 
+{
+  PUBLIC_IP = await fetchPublicIp();
+  process.env.PUBLIC_IP = PUBLIC_IP; // ← disponible en el proceso
+  console.log("🌐 Public IP:", PUBLIC_IP);
   
-  // Source - https://stackoverflow.com/a
-// Posted by mgear, modified by community. See post 'Timeline' for change history
-// Retrieved 2026-01-25, License - CC BY-SA 4.0
-
-http.get({'host': 'api.ipify.org', 'port': 80, 'path': '/'}, function(resp) {
-  resp.on('data', function(ip) {
-    ipPublica=String(ip);
-    console.log("My public IP address is: " + ip);
-  });
-});
-
-  
-  console.log(ipPublica)
-
   await initMediasoup();
-  server.listen(PORT, () => {
+  
+  server.listen(PORT, () => 
+  {
     console.log(`🚀 Node RTP Server en http://0.0.0.0:${PORT}`);
   });
 })();
