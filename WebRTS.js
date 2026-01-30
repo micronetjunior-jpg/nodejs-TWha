@@ -4,6 +4,7 @@ import WebSocket, { WebSocketServer } from "ws";
 import { initMediasoup, router } from "./mediasoup.js";
 
 let ipPublica = "";
+let PUBLIC_IP = "";
 
 const app = express();
 
