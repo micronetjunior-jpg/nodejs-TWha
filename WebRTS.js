@@ -63,7 +63,7 @@ app.post("/call/start", async (req, res) => {
         codecs: [
           {
             mimeType: "audio/opus",
-            payloadType: 100,
+            payloadType: 111,
             clockRate: 48000,
             channels: 2
           }
