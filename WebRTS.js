@@ -88,7 +88,7 @@ app.post("/call/start", async (req, res) => {
     console.log("📡 IP:", transport.tuple.localIp);
     console.log("📡 PORT:", transport.tuple.localPort);
     console.log("📡 CALL ID:", call_id);
-    console.log(producer)
+    console.log(producer);
 
     // 3️⃣ Avisar a Python que ya puede enviar audio
     pythonWS?.send(JSON.stringify({
