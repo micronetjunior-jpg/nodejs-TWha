@@ -134,6 +134,12 @@ function fetchPublicIp()
   PUBLIC_IP = await fetchPublicIp();
   process.env.PUBLIC_IP = PUBLIC_IP; // ← disponible en el proceso
   console.log("🌐 Public IP:", PUBLIC_IP);
+
+  setInterval(async () => {
+    if (!producer) return;
+    const stats = await producer.getStats();
+    console.log("📊 Producer stats:", stats);
+  }, 2000);
   
   await initMediasoup();
   
